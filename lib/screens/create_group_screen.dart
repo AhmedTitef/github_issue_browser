@@ -127,7 +127,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
   void createRandomInviteCode() {
     setState(() {
-      inviteCode = randomString(5);
+      inviteCode = randomAlphaNumeric(6);
     });
   }
 }
