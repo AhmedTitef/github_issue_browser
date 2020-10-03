@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "693335057521",
+    "firebase_url": "https://cops-around-dc241.firebaseio.com",
+    "project_id": "cops-around-dc241",
+    "storage_bucket": "cops-around-dc241.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:693335057521:android:26b6de159d0da3bffea7d0",
+        "android_client_info": {
+          "package_name": "com.titef.copsalert"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "693335057521-ddkfg16mu8cd5528ef0ppppeuck71crd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD32m0I9Ejie3wcoJm5EhBEbuNJUcLDis8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "693335057521-ddkfg16mu8cd5528ef0ppppeuck71crd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "693335057521-58i8dminkgem8h6vdioo4a6uuto1p46p.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.titef.copsalert"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
