@@ -21,19 +21,23 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-
-  DropdownMenuItem dropdownValue = DropdownMenuItem(child: Text("No Rooms"), value: null,);
+  DropdownMenuItem dropdownValue = DropdownMenuItem(
+    child: Text("No Rooms"),
+    value: null,
+  );
   var errorMessage = "";
   final FirebaseMessaging _fcm = FirebaseMessaging();
   StreamSubscription iosSubscription;
+
   void getInviteCode() {}
 
   playLocal() async {
     AudioPlayer audioPlayer = new AudioPlayer();
-   // int result = await audioPlayer.play(localPath, isLocal: true);
+    // int result = await audioPlayer.play(localPath, isLocal: true);
   }
 
-  static Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
+  static Future<dynamic> myBackgroundMessageHandler(
+      Map<String, dynamic> message) async {
     if (message.containsKey('data')) {
       // Handle data message
       final dynamic data = message['data'];
@@ -46,6 +50,7 @@ class _MainScreenState extends State<MainScreen> {
 
     // Or do other work.
   }
+
   AudioCache audioCache = AudioCache();
 
   @override
@@ -64,27 +69,27 @@ class _MainScreenState extends State<MainScreen> {
         audioCache.play("test1.mp3");
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            content: ListTile(
-              title: Text(message['notification']['title']),
-              subtitle: Text(message['notification']['body']),
-            ),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('OK'),
-                onPressed: (){
-                  audioCache.clear("test1.mp3");
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
+          builder: (context) {
+            return AlertDialog(
+              title: Text("COPS AROUND!!"),
+              content: Text("SLOW DOWN MAN!!"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    audioCache.clear("test1.mp3");
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
         );
       },
-      onBackgroundMessage: myBackgroundMessageHandler,
+      onBackgroundMessage:
+          Platform.isAndroid ? myBackgroundMessageHandler : null,
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
-
 
         // TODO optional
       },
@@ -95,10 +100,11 @@ class _MainScreenState extends State<MainScreen> {
     );
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return NeumorphicApp(
-
+      themeMode: ThemeMode.light,
       home: Scaffold(
         floatingActionButton: NeumorphicFloatingActionButton(
           child: Icon(Icons.add, size: 30),
@@ -106,78 +112,73 @@ class _MainScreenState extends State<MainScreen> {
             _settingModalBottomSheet(context);
           },
         ),
-        backgroundColor: NeumorphicTheme.baseColor(context),
         body: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Neumorphic(
-                padding: EdgeInsets.all(14),
-                style: NeumorphicStyle(),
-                child: Text("Joined Group: "),
-              ),
-
-              StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection("users")
-                    .doc(FirebaseAuth.instance.currentUser.uid)
-                    .collection("rooms")
-                    .snapshots(),
-                // ignore: missing_return
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    List<DropdownMenuItem> roomsList = [];
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Joined Groups: "),
+                    SizedBox(width: 40,),
+                    StreamBuilder(
+                      stream: FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(FirebaseAuth.instance.currentUser.uid)
+                          .collection("rooms")
+                          .snapshots(),
+                      // ignore: missing_return
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          List<DropdownMenuItem> roomsList = [];
 //                    roomsList.add(DropdownMenuItem(child: Text("No Room"), value: "Nothing",));
-                    for (DocumentSnapshot room in snapshot.data.documents) {
-                      roomsList.add(DropdownMenuItem(
-                        child: Text(room.id),
-                        value: room.id,
-                      ));
-                    }
-
-                    return DropdownButton<dynamic>(
-                      icon: Icon(Icons.arrow_downward),
-                      iconSize: 15,
-                      elevation: 16,
-                      value: dropdownValue.value,
-                      style: TextStyle(color: Colors.black),
-                      underline: Container(
-                        height: 2,
-                        color: Colors.black,
-                      ),
-
-
-
-                      onChanged: (newValue) {
-                        var oldvalue;
-                        print("new valueeeeeeeeeeeeeeee::: " + newValue);
-                        setState(() {
-
-
-                          _fcm.unsubscribeFromTopic(dropdownValue.value);
-
-
-//                          dropdownValue = newValue;
-                          var item = DropdownMenuItem(
-                            child: Text(newValue),value: newValue,
-                          );
-                          dropdownValue = item;
-                          if (dropdownValue.value != null){
-                            _fcm.subscribeToTopic(dropdownValue.value);
-                            oldvalue = dropdownValue;
-                          }else{
-                            errorMessage = "Please Choose or Join a Room";
+                          for (DocumentSnapshot room in snapshot.data.documents) {
+                            roomsList.add(DropdownMenuItem(
+                              child: Text(room.id),
+                              value: room.id,
+                            ));
                           }
 
+                          return DropdownButton<dynamic>(
+                            icon: Icon(Icons.arrow_downward),
+                            iconSize: 15,
+                            elevation: 16,
+                            value: dropdownValue.value,
+                            style: TextStyle(color: Colors.black),
+                            underline: Container(
+                              height: 2,
+                              color: Colors.black,
+                            ),
+                            onChanged: (newValue) {
+                              var oldvalue;
+                              print("new valueeeeeeeeeeeeeeee::: " + newValue);
+                              setState(() {
+                                _fcm.unsubscribeFromTopic(dropdownValue.value);
 
-                        });
+//                          dropdownValue = newValue;
+                                var item = DropdownMenuItem(
+                                  child: Text(newValue),
+                                  value: newValue,
+                                );
+                                dropdownValue = item;
+                                if (dropdownValue.value != null) {
+                                  _fcm.subscribeToTopic(dropdownValue.value);
+                                  oldvalue = dropdownValue;
+                                } else {
+                                  errorMessage = "Please Choose or Join a Room";
+                                }
+                              });
+                            },
+                            items: roomsList,
+                          );
+                        } else {
+                          return Text("No rooms");
+                        }
                       },
-                      items: roomsList,
-                    );
-                  } else {
-                    return Text("No rooms");
-                  }
-                },
+                    ),
+                  ],
+                ),
               ),
 
 //              Neumorphic(
@@ -186,53 +187,52 @@ class _MainScreenState extends State<MainScreen> {
 //                },),
 //
 //              ),
+
+              SizedBox(height: 40,),
               NeumorphicButton(
                 pressed: null,
                 provideHapticFeedback: true,
                 onPressed: () {
-
-
 //                  _signInAnonymously();
 
-                if (dropdownValue.value ==null ){
-                  setState(() {
-                    errorMessage = "Please Join a room first";
-                  });
-                }else{
-                  print("pressed");
-                  FirebaseFirestore.instance
-                      .collection("rooms")
-                      .doc(dropdownValue.value)
-                      .collection(dropdownValue.value)
-                      .doc()
-                      .get()
-                      .then((value) {
-                    if (!value.exists) {
-                      setState(() {
-                        errorMessage = "";
-                      });
+                  if (dropdownValue.value == null) {
+                    setState(() {
+                      errorMessage = "Please Join a room first";
+                    });
+                  } else {
+                    print("pressed");
+                    FirebaseFirestore.instance
+                        .collection("rooms")
+                        .doc(dropdownValue.value)
+                        .collection(dropdownValue.value)
+                        .doc()
+                        .get()
+                        .then((value) {
+                      if (!value.exists) {
+                        setState(() {
+                          errorMessage = "";
+                        });
 
-                      FirebaseFirestore.instance
-                          .collection("rooms")
-                          .doc(dropdownValue.value)
-                          .collection(dropdownValue.value)
-                          .doc()
-                          .set({
-                        "roomName" : dropdownValue.value,
-                        "myUid" : FirebaseAuth.instance.currentUser.uid,
-                      });
-
-                    } else {
-                      setState(() {
-                        errorMessage = "Please Join a room first";
-                      });
-                    }
-                  });
-                }},
+                        FirebaseFirestore.instance
+                            .collection("rooms")
+                            .doc(dropdownValue.value)
+                            .collection(dropdownValue.value)
+                            .doc()
+                            .set({
+                          "roomName": dropdownValue.value,
+                          "myUid": FirebaseAuth.instance.currentUser.uid,
+                        });
+                      } else {
+                        setState(() {
+                          errorMessage = "Please Join a room first";
+                        });
+                      }
+                    });
+                  }
+                },
                 style: NeumorphicStyle(
-
                   intensity: 15,
-                  depth: 10,
+                  depth: 5,
                   lightSource: LightSource.top,
                   shape: NeumorphicShape.concave,
                   boxShape: NeumorphicBoxShape.circle(),
@@ -242,6 +242,7 @@ class _MainScreenState extends State<MainScreen> {
                   Icons.warning,
                 ),
               ),
+              SizedBox(height: 40,),
               Text(errorMessage),
               NeumorphicButton(
                   margin: EdgeInsets.only(top: 12),
