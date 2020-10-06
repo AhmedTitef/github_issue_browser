@@ -27,6 +27,7 @@ dependencies:
   shared_preferences: ^0.5.12
   random_string: ^2.1.0
   firebase_messaging: ^7.0.2
+  audioplayers: ^0.16.1
 
   neumorphic: ^0.4.0
   firebase_core: ^0.5.0
@@ -40,9 +41,18 @@ dependencies:
   cupertino_icons: ^1.0.0
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.7.5
+  flutter_launcher_name: ^0.0.1
   flutter_test:
     sdk: flutter
 
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/copsicon.jpg"
+
+flutter_launcher_name:
+  name: "COPS AROUND"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -55,7 +65,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - assets/copsicon.jpg
+    - assets/test1.mp3
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

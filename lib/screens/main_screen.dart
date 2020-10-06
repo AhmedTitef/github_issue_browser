@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:audioplayers/audio_cache.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:copsalert/screens/create_group_screen.dart';
@@ -19,11 +21,32 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  var dropdownValue;
+
+  DropdownMenuItem dropdownValue = DropdownMenuItem(child: Text("No Rooms"), value: null,);
   var errorMessage = "";
   final FirebaseMessaging _fcm = FirebaseMessaging();
   StreamSubscription iosSubscription;
   void getInviteCode() {}
+
+  playLocal() async {
+    AudioPlayer audioPlayer = new AudioPlayer();
+   // int result = await audioPlayer.play(localPath, isLocal: true);
+  }
+
+  static Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
+    if (message.containsKey('data')) {
+      // Handle data message
+      final dynamic data = message['data'];
+    }
+
+    if (message.containsKey('notification')) {
+      // Handle notification message
+      final dynamic notification = message['notification'];
+    }
+
+    // Or do other work.
+  }
+  AudioCache audioCache = AudioCache();
 
   @override
   void initState() {
@@ -38,6 +61,7 @@ class _MainScreenState extends State<MainScreen> {
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
+        audioCache.play("test1.mp3");
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -47,15 +71,21 @@ class _MainScreenState extends State<MainScreen> {
             ),
             actions: <Widget>[
               FlatButton(
-                child: Text('Ok'),
-                onPressed: () => Navigator.of(context).pop(),
+                child: Text('OK'),
+                onPressed: (){
+                  audioCache.clear("test1.mp3");
+                  Navigator.of(context).pop();
+                },
               ),
             ],
           ),
         );
       },
+      onBackgroundMessage: myBackgroundMessageHandler,
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
+
+
         // TODO optional
       },
       onResume: (Map<String, dynamic> message) async {
@@ -97,6 +127,7 @@ class _MainScreenState extends State<MainScreen> {
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     List<DropdownMenuItem> roomsList = [];
+//                    roomsList.add(DropdownMenuItem(child: Text("No Room"), value: "Nothing",));
                     for (DocumentSnapshot room in snapshot.data.documents) {
                       roomsList.add(DropdownMenuItem(
                         child: Text(room.id),
@@ -108,20 +139,37 @@ class _MainScreenState extends State<MainScreen> {
                       icon: Icon(Icons.arrow_downward),
                       iconSize: 15,
                       elevation: 16,
-                      value: dropdownValue,
+                      value: dropdownValue.value,
                       style: TextStyle(color: Colors.black),
                       underline: Container(
                         height: 2,
-                        color: Colors.blue,
+                        color: Colors.black,
                       ),
 
+
+
                       onChanged: (newValue) {
+                        var oldvalue;
+                        print("new valueeeeeeeeeeeeeeee::: " + newValue);
                         setState(() {
 
-                          _fcm.unsubscribeFromTopic(dropdownValue);
 
-                          dropdownValue = newValue;
-                          _fcm.subscribeToTopic(dropdownValue);
+                          _fcm.unsubscribeFromTopic(dropdownValue.value);
+
+
+//                          dropdownValue = newValue;
+                          var item = DropdownMenuItem(
+                            child: Text(newValue),value: newValue,
+                          );
+                          dropdownValue = item;
+                          if (dropdownValue.value != null){
+                            _fcm.subscribeToTopic(dropdownValue.value);
+                            oldvalue = dropdownValue;
+                          }else{
+                            errorMessage = "Please Choose or Join a Room";
+                          }
+
+
                         });
                       },
                       items: roomsList,
@@ -146,7 +194,7 @@ class _MainScreenState extends State<MainScreen> {
 
 //                  _signInAnonymously();
 
-                if (dropdownValue ==null ){
+                if (dropdownValue.value ==null ){
                   setState(() {
                     errorMessage = "Please Join a room first";
                   });
@@ -154,8 +202,8 @@ class _MainScreenState extends State<MainScreen> {
                   print("pressed");
                   FirebaseFirestore.instance
                       .collection("rooms")
-                      .doc(dropdownValue)
-                      .collection(dropdownValue)
+                      .doc(dropdownValue.value)
+                      .collection(dropdownValue.value)
                       .doc()
                       .get()
                       .then((value) {
@@ -166,11 +214,11 @@ class _MainScreenState extends State<MainScreen> {
 
                       FirebaseFirestore.instance
                           .collection("rooms")
-                          .doc(dropdownValue)
-                          .collection(dropdownValue)
+                          .doc(dropdownValue.value)
+                          .collection(dropdownValue.value)
                           .doc()
                           .set({
-                        "roomName" : dropdownValue,
+                        "roomName" : dropdownValue.value,
                         "myUid" : FirebaseAuth.instance.currentUser.uid,
                       });
 
@@ -198,6 +246,8 @@ class _MainScreenState extends State<MainScreen> {
               NeumorphicButton(
                   margin: EdgeInsets.only(top: 12),
                   onPressed: () {
+                    print(dropdownValue.value);
+                    _fcm.unsubscribeFromTopic(dropdownValue.value);
                     _signOut();
 //                    NeumorphicTheme.of(context).themeMode =
 //                    NeumorphicTheme.isUsingDark(context)
